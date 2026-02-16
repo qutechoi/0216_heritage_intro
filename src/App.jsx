@@ -14,6 +14,7 @@ export default function App() {
     const f = e.target.files?.[0];
     if (!f) return;
     setFile(f);
+    setResult(null);
     setError('');
     const reader = new FileReader();
     reader.onload = () => setPreview(reader.result);
@@ -24,6 +25,7 @@ export default function App() {
     if (!file) return;
     setLoading(true);
     setError('');
+    setResult(null);
     try {
       const base64 = preview.split(',')[1];
       const resp = await fetch('/api/gemini', {
@@ -44,55 +46,79 @@ export default function App() {
     }
   };
 
-  const display = result;
-
   return (
     <div className="container">
       <header>
         <h1>Heritage Intro</h1>
-        <p>문화재 사진을 올리면 역사적 배경과 가치 설명을 제공합니다.</p>
+        <p>문화재 사진을 올리면 역사적 배경과 가치를 알려드립니다.</p>
       </header>
 
-      <section className="card">
+      <section className="card upload-card">
         <div className="upload">
-          <input type="file" accept="image/*" onChange={handleFile} />
-          {preview && <img className="preview" src={preview} alt="preview" />}
+          <label className="file-label">
+            사진 선택
+            <input type="file" accept="image/*" onChange={handleFile} hidden />
+          </label>
+          {file && <span className="file-name">{file.name}</span>}
         </div>
+        {preview && <img className="preview" src={preview} alt="preview" />}
         <button disabled={!canAnalyze} onClick={analyze}>
-          {loading ? '분석 중...' : '사진 분석하기'}
+          {loading ? '분석 중...' : '분석하기'}
         </button>
         {error && <p className="error">{error}</p>}
       </section>
 
-      {display && (
-        <section className="card">
-          <h2>{display.title}</h2>
-          <div className="meta">
-            <span>시대: {display.era}</span>
-            <span>위치: {display.location}</span>
+      {result && (
+        <section className="report">
+          <div className="report-header">
+            <h2 className="report-title">{result.title}</h2>
+            {result.designation && (
+              <span className="badge">{result.designation}</span>
+            )}
           </div>
-          <p className="desc">{display.description}</p>
-          {display.keyPoints?.length > 0 && (
-            <>
-              <h3>핵심 포인트</h3>
-              <ul>
-                {display.keyPoints.map((k, i) => (
+
+          <div className="report-meta">
+            <div className="meta-item">
+              <span className="meta-label">시대</span>
+              <span className="meta-value">{result.era}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">위치</span>
+              <span className="meta-value">{result.location}</span>
+            </div>
+          </div>
+
+          <div className="report-section">
+            <h3>개요</h3>
+            <p>{result.description}</p>
+          </div>
+
+          {result.keyPoints?.length > 0 && (
+            <div className="report-section">
+              <h3>주요 특징</h3>
+              <ul className="key-points">
+                {result.keyPoints.map((k, i) => (
                   <li key={i}>{k}</li>
                 ))}
               </ul>
-            </>
+            </div>
           )}
-          {display.culturalSignificance && (
-            <p className="significance">{display.culturalSignificance}</p>
+
+          {result.culturalSignificance && (
+            <div className="report-section">
+              <h3>문화적 가치</h3>
+              <p>{result.culturalSignificance}</p>
+            </div>
           )}
-          {display.disclaimer && (
-            <p className="disclaimer">{display.disclaimer}</p>
+
+          {result.disclaimer && (
+            <p className="disclaimer">{result.disclaimer}</p>
           )}
         </section>
       )}
 
       <footer>
-        <small>© 2026 Heritage Intro — 비공식 참고용</small>
+        <small>&copy; 2026 Heritage Intro &mdash; 비공식 참고용</small>
       </footer>
     </div>
   );
