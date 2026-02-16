@@ -86,6 +86,10 @@ Return ONLY valid JSON with:
       }
     }
 
+    if (parsed && typeof parsed === 'object' && !parsed.raw && (text || '').trim()) {
+      parsed.raw = (text || '').trim();
+    }
+
     return new Response(JSON.stringify(parsed), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

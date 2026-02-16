@@ -61,12 +61,7 @@ export default function App() {
 
       {result && (
         <section className="card">
-          {result.raw ? (
-            <>
-              <h2>모델 응답 (원문)</h2>
-              <pre className="raw">{result.raw}</pre>
-            </>
-          ) : (
+          {result.title || result.description ? (
             <>
               <h2>{result.title}</h2>
               <div className="meta">
@@ -82,6 +77,17 @@ export default function App() {
               </ul>
               {result.caution && <p className="caution">{result.caution}</p>}
               <p className="disclaimer">{result.disclaimer}</p>
+              {result.raw && (
+                <>
+                  <h3>모델 원문</h3>
+                  <pre className="raw">{result.raw}</pre>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <h2>모델 응답 (원문)</h2>
+              <pre className="raw">{result.raw}</pre>
             </>
           )}
         </section>
