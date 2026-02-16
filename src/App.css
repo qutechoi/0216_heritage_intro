@@ -1,0 +1,18 @@
+:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, sans-serif; color: #1f2328; background: #f6f7fb; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.container { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+header h1 { margin: 0 0 6px; }
+header p { margin: 0 0 18px; color: #555; }
+.card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); margin: 14px 0; }
+.upload { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.preview { width: 240px; border-radius: 10px; border: 1px solid #eee; }
+button { background: #111827; color: #fff; border: none; padding: 12px 18px; border-radius: 10px; font-size: 15px; cursor: pointer; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+.error { color: #c62828; margin-top: 10px; }
+.meta { display:flex; gap:16px; color:#555; font-size:14px; margin:8px 0 12px; }
+.desc { line-height: 1.6; }
+.caution { margin-top: 8px; color:#b45309; }
+.disclaimer { margin-top: 12px; font-size: 12px; color: #777; }
+.raw { background:#0b1020; color:#d7e3ff; padding:12px; border-radius:8px; overflow:auto; font-size:12px; }
+footer { text-align: center; margin-top: 20px; color: #777; }
