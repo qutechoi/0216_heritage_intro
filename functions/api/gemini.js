@@ -1,105 +1,74 @@
 export async function onRequestPost(context) {
-  try {
-    const { request, env } = context;
-    const body = await request.json();
-    const { imageBase64, mimeType } = body || {};
+  const { imageBase64, mimeType } = await context.request.json();
+  const apiKey = context.env.GEMINI_API_KEY;
 
-    if (!imageBase64) {
-      return new Response(JSON.stringify({ error: 'imageBase64 required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const apiKey = env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not set' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const prompt = `You are a cultural heritage expert.
-Analyze the photo and identify the cultural heritage (if possible).
-Return ONLY valid JSON with:
-- title: heritage name (Korean)
-- era: estimated era/period
-- location: possible location or region
-- description: 3-5 sentences in Korean (history, significance, value)
-- keyPoints: 3-5 bullet points in Korean
-- caution: if uncertain, say so clearly
-- disclaimer: not official, suggest checking with museum/official sources`;
-
-    const payload = {
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: prompt },
-            {
-              inline_data: {
-                mime_type: mimeType || 'image/png',
-                data: imageBase64,
-              },
+  const payload = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `이 이미지에 나오는 문화재나 유적지를 분석해주세요. 다음 JSON 형식으로만 응답해주세요:
+{
+  "title": "문화재 이름 (한글 및 영문)",
+  "period": "시대 (예: 백제시대, 조선시대)",
+  "location": "위치",
+  "description": "간단한 설명 (2-3문장)",
+  "keyPoints": ["특징1", "특징2", "특징3"],
+  "culturalSignificance": "문화적 의의"
+}
+JSON만 반환하고 다른 텍스트는 포함하지 마세요.`,
+          },
+          {
+            inline_data: {
+              mime_type: mimeType,
+              data: imageBase64,
             },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 1200,
-        responseMimeType: 'application/json',
+          },
+        ],
       },
-    };
+    ],
+    generationConfig: {
+      temperature: 0.4,
+      topK: 32,
+      topP: 1,
+      maxOutputTokens: 2048,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          period: { type: "string" },
+          location: { type: "string" },
+          description: { type: "string" },
+          keyPoints: { type: "array", items: { type: "string" } },
+          culturalSignificance: { type: "string" },
+        },
+        required: ["title", "description"],
+      },
+    },
+  };
 
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+    {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
-
-    if (!resp.ok) {
-      const errText = await resp.text();
-      return new Response(JSON.stringify({ error: 'Gemini error', details: errText }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
     }
+  );
 
-    const data = await resp.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const raw = (text || '').trim();
-      const start = raw.indexOf('{');
-      const end = raw.lastIndexOf('}');
-      if (start !== -1 && end !== -1 && end > start) {
-        const jsonChunk = raw.slice(start, end + 1);
-        try {
-          parsed = JSON.parse(jsonChunk);
-        } catch {
-          parsed = { raw };
-        }
-      } else {
-        parsed = { raw };
-      }
-    }
-
-    if (parsed && typeof parsed === 'object' && !parsed.raw && (text || '').trim()) {
-      parsed.raw = (text || '').trim();
-    }
-
-    return new Response(JSON.stringify(parsed), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'Server error', details: String(err) }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('JSON 파싱 실패:', err);
+    parsed = { title: "파싱 오류", description: "응답을 처리할 수 없습니다.", raw: text };
   }
+
+  return new Response(JSON.stringify(parsed), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
