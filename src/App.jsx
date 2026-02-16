@@ -31,9 +31,12 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: base64, mimeType: file.type || 'image/png' }),
       });
-      if (!resp.ok) throw new Error('Gemini 분석 실패');
       const data = await resp.json();
-      setResult(data);
+      if (data.title) {
+        setResult(data);
+      } else {
+        setError('분석 결과를 받지 못했어요. 다시 시도해 주세요.');
+      }
     } catch (e) {
       setError('분석에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
@@ -41,21 +44,7 @@ export default function App() {
     }
   };
 
-  const display = (() => {
-    if (!result) return null;
-    if (result.title || result.description) return result;
-    if (result.raw && result.raw.trim().startsWith('{')) {
-      const raw = result.raw;
-      const start = raw.indexOf('{');
-      const end = raw.lastIndexOf('}');
-      if (start !== -1 && end !== -1 && end > start) {
-        try {
-          return { ...result, ...JSON.parse(raw.slice(start, end + 1)) };
-        } catch {}
-      }
-    }
-    return result;
-  })();
+  const display = result;
 
   return (
     <div className="container">
@@ -77,34 +66,27 @@ export default function App() {
 
       {display && (
         <section className="card">
-          {display.title || display.description ? (
+          <h2>{display.title}</h2>
+          <div className="meta">
+            <span>시대: {display.era}</span>
+            <span>위치: {display.location}</span>
+          </div>
+          <p className="desc">{display.description}</p>
+          {display.keyPoints?.length > 0 && (
             <>
-              <h2>{display.title}</h2>
-              <div className="meta">
-                <span>시대: {display.era}</span>
-                <span>위치: {display.location}</span>
-              </div>
-              <p className="desc">{display.description}</p>
               <h3>핵심 포인트</h3>
               <ul>
-                {(display.keyPoints || []).map((k, i) => (
+                {display.keyPoints.map((k, i) => (
                   <li key={i}>{k}</li>
                 ))}
               </ul>
-              {display.caution && <p className="caution">{display.caution}</p>}
-              <p className="disclaimer">{display.disclaimer}</p>
-              {display.raw && (
-                <>
-                  <h3>모델 원문</h3>
-                  <pre className="raw">{display.raw}</pre>
-                </>
-              )}
             </>
-          ) : (
-            <>
-              <h2>모델 응답 (원문)</h2>
-              <pre className="raw">{display.raw}</pre>
-            </>
+          )}
+          {display.culturalSignificance && (
+            <p className="significance">{display.culturalSignificance}</p>
+          )}
+          {display.disclaimer && (
+            <p className="disclaimer">{display.disclaimer}</p>
           )}
         </section>
       )}
