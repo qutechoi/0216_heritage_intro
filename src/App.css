@@ -92,6 +92,124 @@ button:disabled {
   font-size: 14px;
 }
 
+/* Candidates */
+.candidates-section {
+  margin-top: 20px;
+  text-align: center;
+}
+.candidates-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.candidates-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+.candidates-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.candidate-card {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.candidate-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+}
+.candidate-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1f2328;
+  margin-bottom: 2px;
+}
+.candidate-name-en {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 10px;
+}
+.candidate-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.candidate-meta span {
+  font-size: 12px;
+  padding: 3px 10px;
+  background: #f0f2f5;
+  border-radius: 20px;
+  color: #555;
+}
+.candidate-brief {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+  margin-bottom: 12px;
+  flex: 1;
+}
+.candidate-confidence {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.confidence-bar {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  background: #6366f1;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.confidence-label {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+/* Loading */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  font-size: 14px;
+  color: #666;
+}
+
 /* Report */
 .report {
   background: #fff;
@@ -196,6 +314,18 @@ button:disabled {
   text-align: center;
 }
 
+.reset-btn {
+  display: block;
+  margin: 24px auto 0;
+  background: #f0f2f5;
+  color: #374151;
+  font-size: 14px;
+  padding: 10px 24px;
+}
+.reset-btn:hover {
+  background: #e4e7ec;
+}
+
 /* Footer */
 footer {
   text-align: center;
@@ -210,4 +340,6 @@ footer {
   .report { padding: 20px; }
   .report-meta { grid-template-columns: 1fr; }
   .report-title { font-size: 19px; }
+  .candidates-grid { grid-template-columns: 1fr; }
+  .candidate-card { padding: 16px; }
 }
