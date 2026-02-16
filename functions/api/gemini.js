@@ -74,10 +74,12 @@ Return ONLY valid JSON with:
       parsed = JSON.parse(text);
     } catch {
       const raw = (text || '').trim();
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start !== -1 && end !== -1 && end > start) {
+        const jsonChunk = raw.slice(start, end + 1);
         try {
-          parsed = JSON.parse(jsonMatch[0]);
+          parsed = JSON.parse(jsonChunk);
         } catch {
           parsed = { raw };
         }

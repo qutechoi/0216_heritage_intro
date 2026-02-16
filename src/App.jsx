@@ -41,6 +41,22 @@ export default function App() {
     }
   };
 
+  const display = (() => {
+    if (!result) return null;
+    if (result.title || result.description) return result;
+    if (result.raw && result.raw.trim().startsWith('{')) {
+      const raw = result.raw;
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start !== -1 && end !== -1 && end > start) {
+        try {
+          return { ...result, ...JSON.parse(raw.slice(start, end + 1)) };
+        } catch {}
+      }
+    }
+    return result;
+  })();
+
   return (
     <div className="container">
       <header>
@@ -59,35 +75,35 @@ export default function App() {
         {error && <p className="error">{error}</p>}
       </section>
 
-      {result && (
+      {display && (
         <section className="card">
-          {result.title || result.description ? (
+          {display.title || display.description ? (
             <>
-              <h2>{result.title}</h2>
+              <h2>{display.title}</h2>
               <div className="meta">
-                <span>시대: {result.era}</span>
-                <span>위치: {result.location}</span>
+                <span>시대: {display.era}</span>
+                <span>위치: {display.location}</span>
               </div>
-              <p className="desc">{result.description}</p>
+              <p className="desc">{display.description}</p>
               <h3>핵심 포인트</h3>
               <ul>
-                {(result.keyPoints || []).map((k, i) => (
+                {(display.keyPoints || []).map((k, i) => (
                   <li key={i}>{k}</li>
                 ))}
               </ul>
-              {result.caution && <p className="caution">{result.caution}</p>}
-              <p className="disclaimer">{result.disclaimer}</p>
-              {result.raw && (
+              {display.caution && <p className="caution">{display.caution}</p>}
+              <p className="disclaimer">{display.disclaimer}</p>
+              {display.raw && (
                 <>
                   <h3>모델 원문</h3>
-                  <pre className="raw">{result.raw}</pre>
+                  <pre className="raw">{display.raw}</pre>
                 </>
               )}
             </>
           ) : (
             <>
               <h2>모델 응답 (원문)</h2>
-              <pre className="raw">{result.raw}</pre>
+              <pre className="raw">{display.raw}</pre>
             </>
           )}
         </section>
